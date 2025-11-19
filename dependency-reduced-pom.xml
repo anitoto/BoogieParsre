@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>towzer</groupId>
+  <artifactId>boogie-parser</artifactId>
+  <version>1.0</version>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>${maven-compiler-source}</source>
+          <target>${maven-compiler-target}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>towzer.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>false</shadedArtifactAttached>
+              <shadedClassifierName />
+              <transformers>
+                <transformer>
+                  <mainClass>towzer.Main</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>generate</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>generate-cup-jflex</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo>Running JavaCUP for BoogieParser...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for BoogieParser...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                    <echo>Running JavaCUP for UtopiaSpecLang...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for UtopiaSpecLang...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                    <echo>Running JavaCUP for SMT solver...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for SMT solver...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                    <echo>Running JavaCUP for dimacs...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for dimacs...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                    <echo>Running JavaCUP for SMTLIB...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for SMTLIB...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                    <echo>Running JavaCUP for SMTLIB2...</echo>
+                    <java>
+                      <classpath>
+                        <pathelement />
+                      </classpath>
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                      <arg />
+                    </java>
+                    <echo>Running JFlex for SMTLIB2...</echo>
+                    <java>
+                      <arg />
+                    </java>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  <repositories>
+    <repository>
+      <id>apromore-releases</id>
+      <url>https://raw.githubusercontent.com/apromore/ApromoreCE_SupportLibs/master/mvn-repo/</url>
+    </repository>
+  </repositories>
+  <properties>
+    <flex.jar>${project.basedir}/src/main/java/javacup/JFlex.jar</flex.jar>
+    <maven-compiler-target>1.8</maven-compiler-target>
+    <cup.dir>${project.basedir}/src/main/java/ultimate/parser</cup.dir>
+    <maven-compiler-source>1.8</maven-compiler-source>
+    <cup.compiler.jar>${project.basedir}/src/main/java/javacup/jh-javacup-1.2.jar</cup.compiler.jar>
+    <cup.runtime.jar>${project.basedir}/src/main/java/javacup/jh-javacup-1.2-runtime.jar</cup.runtime.jar>
+  </properties>
+</project>

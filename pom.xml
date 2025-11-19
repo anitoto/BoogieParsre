@@ -1,0 +1,268 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+  http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>towzer</groupId>
+	<artifactId>boogie-parser</artifactId>
+	<version>1.0</version>
+
+	<properties>
+		<maven-compiler-source>1.8</maven-compiler-source>
+		<maven-compiler-target>1.8</maven-compiler-target>
+		<cup.dir>${project.basedir}/src/main/java/ultimate/parser</cup.dir>
+		<cup.compiler.jar>${project.basedir}/src/main/java/javacup/jh-javacup-1.2.jar</cup.compiler.jar>
+		<cup.runtime.jar>${project.basedir}/src/main/java/javacup/jh-javacup-1.2-runtime.jar</cup.runtime.jar>
+		<flex.jar>${project.basedir}/src/main/java/javacup/JFlex.jar</flex.jar>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>apromore-releases</id>
+			<url>https://raw.githubusercontent.com/apromore/ApromoreCE_SupportLibs/master/mvn-repo/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- JavaCUP runtime -->
+		<dependency>
+			<groupId>com.github.jhoenicke</groupId>
+			<artifactId>javacup-runtime</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.sf.javabdd/javabdd -->
+		<dependency>
+			<groupId>net.sf.javabdd</groupId>
+			<artifactId>javabdd</artifactId>
+			<version>1.0b2</version>
+		</dependency>
+
+		<!-- Interactive BoogieParser preferences -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.17.1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Java compiler plugin -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${maven-compiler-source}</source>
+					<target>${maven-compiler-target}</target>
+				</configuration>
+			</plugin>
+
+			<!-- Make the executable JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>towzer.Main</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<!-- Shade plugin to create a self-contained JAR with dependencies -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<!-- Overwrite the original JAR instead of making a *-shaded.jar -->
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<shadedClassifierName></shadedClassifierName>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>towzer.Main</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>generate</id>
+			<build>
+				<plugins>
+					<!-- Generate Lexer.java and Parser.java -->
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>generate-cup-jflex</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<echo>Running JavaCUP for BoogieParser...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${cup.dir}"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-expect"/>
+											<arg value="1"/>
+											<arg value="Boogie.cup"/>
+										</java>
+
+										<echo>Running JFlex for BoogieParser...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${cup.dir}"
+											failonerror="true">
+											<arg value="Boogie.flex"/>
+										</java>
+
+										<echo>Running JavaCUP for UtopiaSpecLang...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${project.basedir}/src/main/java/utopia/specLang"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-parser"/>
+											<arg value="SpecLangParser"/>
+											<arg value="-symbols"/>
+											<arg value="SpecLangSymbols"/>
+											<arg value="specLang.cup"/>
+										</java>
+
+										<echo>Running JFlex for UtopiaSpecLang...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${project.basedir}/src/main/java/utopia/specLang"
+											failonerror="true">
+											<arg value="specLang.flex"/>
+										</java>
+
+										<echo>Running JavaCUP for SMT solver...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtsolver"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-parser"/>
+											<arg value="Parser"/>
+											<arg value="-symbols"/>
+											<arg value="LexerSymbols"/>
+											<arg value="scriptResult.cup"/>
+										</java>
+
+										<echo>Running JFlex for SMT solver...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtsolver"
+											failonerror="true">
+											<arg value="scriptResult.flex"/>
+										</java>
+
+										<echo>Running JavaCUP for dimacs...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/dimacs"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-parser"/>
+											<arg value="Parser"/>
+											<arg value="-symbols"/>
+											<arg value="LexerSymbols"/>
+											<arg value="dimacs.cup"/>
+										</java>
+
+										<echo>Running JFlex for dimacs...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/dimacs"
+											failonerror="true">
+											<arg value="dimacs.flex"/>
+										</java>
+
+										<echo>Running JavaCUP for SMTLIB...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/smtlib"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-parser"/>
+											<arg value="Parser"/>
+											<arg value="-symbols"/>
+											<arg value="LexerSymbols"/>
+											<arg value="smtlib.cup"/>
+										</java>
+
+										<echo>Running JFlex for SMTLIB...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/smtlib"
+											failonerror="true">
+											<arg value="smtlib.flex"/>
+										</java>
+
+										<echo>Running JavaCUP for SMTLIB2...</echo>
+										<java classname="com.github.jhoenicke.javacup.Main"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/smtlib2"
+											failonerror="true">
+											<classpath>
+												<pathelement location="${cup.compiler.jar}"/>
+											</classpath>
+											<arg value="-parser"/>
+											<arg value="Parser"/>
+											<arg value="-symbols"/>
+											<arg value="LexerSymbols"/>
+											<arg value="smtlib.cup"/>
+										</java>
+
+										<echo>Running JFlex for SMTLIB2...</echo>
+										<java jar="${flex.jar}"
+											fork="true"
+											dir="${project.basedir}/src/main/java/ultimate/smtinterpol/smtlib2"
+											failonerror="true">
+											<arg value="smtlib.flex"/>
+										</java>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
