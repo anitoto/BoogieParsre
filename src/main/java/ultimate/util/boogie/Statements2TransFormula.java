@@ -744,6 +744,7 @@ public class Statements2TransFormula {
 			}
 
 		}
+		// disable check of each statement or not ?
 		return getTransFormula(simplify, false, simplicationTechnique);
 	}
 
