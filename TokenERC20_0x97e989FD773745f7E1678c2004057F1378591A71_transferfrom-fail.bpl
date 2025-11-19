@@ -17,10 +17,6 @@ function abiEncodePacked2R(x: Ref, y: int) returns (ret: int);
 function {:smtdefined "((as const (Array Int Bool)) false)"} zeroRefboolArr() returns (ret: [Ref]bool);
 function {:smtdefined "((as const (Array Int Int)) 0)"} zeroRefintArr() returns (ret: [Ref]int);
 function {:smtdefined "((as const (Array Int (Array Int Int))) ((as const (Array Int Int)) 0))"} zeroRefRefintArr() returns (ret: [Ref][Ref]int);
-function nonlinearMul(x: int, y: int) returns (ret: int);
-function nonlinearDiv(x: int, y: int) returns (ret: int);
-function nonlinearPow(x: int, y: int) returns (ret: int);
-function nonlinearMod(x: int, y: int) returns (ret: int);
 var Balance: [Ref]int;
 var DType: [Ref]ContractName;
 var Alloc: [Ref]bool;
@@ -1037,6 +1033,7 @@ return;
 
 implementation burnFrom~address~uint256_TokenERC20__success(this: Ref, msgsender_MSG: Ref, msgvalue_MSG: int, _from_s533: Ref, _value_s533: int) returns (success_s533: bool)
 {
+var blablabla : int;
 if (!((balanceOf_TokenERC20[this][_from_s533]) >= (_value_s533))) {
 revert := true;
 return;
@@ -1053,7 +1050,9 @@ allowance_TokenERC20[this][_from_s533][msgsender_MSG] := (allowance_TokenERC20[t
 sum_allowance3[_from_s533] := (sum_allowance3[_from_s533]) + (allowance_TokenERC20[this][_from_s533][msgsender_MSG]);
 totalSupply_TokenERC20[this] := (totalSupply_TokenERC20[this]) - (_value_s533);
 assert {:EventEmitted "Burn_TokenERC20"} (true);
+blablabla := 5 / _value_s533;
 success_s533 := true;
+
 return;
 }
 
@@ -1705,6 +1704,8 @@ call success_s533 := burnFrom~address~uint256_TokenERC20(this, msgsender_MSG, ms
 }
 }
 }
+
+
 
 implementation main()
 {

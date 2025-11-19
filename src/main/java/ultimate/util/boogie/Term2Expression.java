@@ -248,7 +248,7 @@ public final class Term2Expression implements Serializable {
 			} else {
 				if ("xor".equals(symb.getName())) {
 					return xor(params);
-				} else if ("mod".equals(symb.getName())) {
+				} else if ("mod".equals(symb.getName()) || "nonlinearMod_Int".equals(symb.getName())) {
 					return mod(params);
 				}
 				final Operator op = getBinaryOperator(symb);
@@ -556,6 +556,12 @@ public final class Term2Expression implements Serializable {
 		} else if ("div".equals(symb.getName())) {
 			return Operator.ARITHDIV;
 		} else if ("mod".equals(symb.getName())) {
+			return Operator.ARITHMOD;
+		} else if ("nonlinearMul_Int".equals(symb.getName()) || "nonlinearMul_Real".equals(symb.getName())) {
+			return Operator.ARITHMUL;
+		} else if ("nonlinearDiv_Int".equals(symb.getName()) || "nonlinearDiv_Real".equals(symb.getName())) {
+			return Operator.ARITHDIV;
+		} else if ("nonlinearMod_Int".equals(symb.getName())) {
 			return Operator.ARITHMOD;
 		} else if ("ite".equals(symb.getName())) {
 			throw new UnsupportedOperationException("not yet implemented");

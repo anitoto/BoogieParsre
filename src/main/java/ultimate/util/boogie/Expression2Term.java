@@ -113,6 +113,33 @@ public class Expression2Term {
 		mVariableManager = variableManager;
 	}
 
+	/**
+	 * Check if an expression is a constant literal.
+	 * 
+	 * @param exp the expression to check
+	 * @return true if the expression is a constant literal, false otherwise
+	 */
+	private boolean isConstantExpression(final Expression exp) {
+		return exp instanceof IntegerLiteral 
+			|| exp instanceof RealLiteral 
+			|| exp instanceof BooleanLiteral 
+			|| exp instanceof BitvecLiteral;
+	}
+
+	/**
+	 * Check if a Boogie type is Real.
+	 * 
+	 * @param type the Boogie type to check
+	 * @return true if the type is Real, false otherwise
+	 */
+	private boolean isRealType(final IBoogieType type) {
+		if (type instanceof ultimate.type.BoogiePrimitiveType) {
+			final ultimate.type.BoogiePrimitiveType primType = (ultimate.type.BoogiePrimitiveType) type;
+			return primType.getTypeCode() == ultimate.type.BoogiePrimitiveType.REAL;
+		}
+		return false;
+	}
+
 	public SingleTermResult translateToTerm(final IIdentifierTranslator[] identifierTranslators,
 			final Expression expression) {
 		assert mSmtIdentifierProviders == null : getClass().getSimpleName() + " in use";
@@ -221,11 +248,37 @@ public class Expression2Term {
 						SmtUtils.termWithLocalSimplification(logger, mScript, equalityFuncname, indices, null,
 								translate(binexp.getLeft()), translate(binexp.getRight())));
 			}
+			
+			// Check if this is a nonlinear operation: *, div, mod
+			final boolean isNonlinearOp = (op == BinaryExpression.Operator.ARITHMUL 
+				|| op == BinaryExpression.Operator.ARITHDIV 
+				|| op == BinaryExpression.Operator.ARITHMOD);
+			
+			// If nonlinear operation AND both operands are NOT constants, use uninterpreted function
+			if (isNonlinearOp && !isConstantExpression(binexp.getLeft()) && !isConstantExpression(binexp.getRight())) {
+				// Determine the function name based on operation and type
+				final String funcname;
+				final IBoogieType leftType = binexp.getLeft().getType();
+				
+				if (op == BinaryExpression.Operator.ARITHMUL) {
+					funcname = isRealType(leftType) ? "nonlinearMul_Real" : "nonlinearMul_Int";
+				} else if (op == BinaryExpression.Operator.ARITHDIV) {
+					funcname = isRealType(leftType) ? "nonlinearDiv_Real" : "nonlinearDiv_Int";
+				} else { // ARITHMOD
+					funcname = "nonlinearMod_Int"; // mod only exists for Int
+				}
+				
+				final BigInteger[] indices = null;
+				return SmtUtils.termWithLocalSimplification(logger, mScript, funcname, indices, null, 
+					translate(binexp.getLeft()), translate(binexp.getRight()));
+			}
+			
+			// Default case: use standard operation translation (for linear ops or when at least one operand is constant)
 			final String funcname = mOperationTranslator.opTranslation(op, binexp.getLeft().getType(),
-					binexp.getRight().getType());
+				binexp.getRight().getType());
 			final BigInteger[] indices = null;
 			return SmtUtils.termWithLocalSimplification(logger, mScript, funcname, indices, null, translate(binexp.getLeft()),
-					translate(binexp.getRight()));
+			translate(binexp.getRight()));
 		} else if (exp instanceof UnaryExpression) {
 			final UnaryExpression unexp = (UnaryExpression) exp;
 			final UnaryExpression.Operator op = unexp.getOperator();

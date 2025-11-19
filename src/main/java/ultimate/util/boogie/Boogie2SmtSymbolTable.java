@@ -70,6 +70,7 @@ import ultimate.util.cfg.variables.IProgramVar;
 import ultimate.util.cfg.variables.ProgramVarUtils;
 import ultimate.util.datastructures.HashRelation;
 import ultimate.util.smt.managedscript.ManagedScript;
+import ultimate.util.smt.SmtSortUtils;
 
 /**
  * Stores a mapping from Boogie identifiers to BoogieVars and a mapping from TermVariables that are representatives of
@@ -154,6 +155,10 @@ public class Boogie2SmtSymbolTable
 			declareFunction(decl);
 		}
 		mScript.echo(this, new QuotedObject("Finished declaration of functions"));
+
+		mScript.echo(this, new QuotedObject("Start declaration of nonlinear functions"));
+		declareNonlinearFunctions();
+		mScript.echo(this, new QuotedObject("Finished declaration of nonlinear functions"));
 
 		mScript.echo(this, new QuotedObject("Start declaration of global variables"));
 		for (final VariableDeclaration decl : mBoogieDeclarations.getGlobalVarDeclarations()) {
@@ -381,6 +386,25 @@ public class Boogie2SmtSymbolTable
 		}
 		mBoogieFunction2SmtFunction.put(id, smtID);
 		mSmtFunction2BoogieFunction.put(smtID, id);
+	}
+
+	/**
+	 * Declare uninterpreted functions for nonlinear arithmetic operations.
+	 */
+	private void declareNonlinearFunctions() {
+		final Sort intSort = SmtSortUtils.getIntSort(mScript.getScript());
+		final Sort realSort = SmtSortUtils.getRealSort(mScript.getScript());
+		
+		// Declare nonlinearMul for Int and Real
+		mScript.getScript().declareFun("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
+		mScript.getScript().declareFun("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
+		
+		// Declare nonlinearDiv for Int and Real
+		mScript.getScript().declareFun("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
+		mScript.getScript().declareFun("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
+		
+		// Declare nonlinearMod for Int only
+		mScript.getScript().declareFun("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
 	}
 
 	/**
