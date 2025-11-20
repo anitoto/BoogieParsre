@@ -17,7 +17,7 @@ public class BinaryExpression extends Expression {
     public enum Operator {
         LOGICIFF, LOGICIMPLIES, LOGICAND, LOGICOR, COMPLT, COMPGT, COMPLEQ, 
         COMPGEQ, COMPEQ, COMPNEQ, COMPPO, BITVECCONCAT, ARITHPLUS, ARITHMINUS, 
-        ARITHMUL, ARITHDIV, ARITHMOD
+        ARITHMUL, ARITHDIV, INTDIV, REALDIV, ARITHMOD 
     }
 
     /**

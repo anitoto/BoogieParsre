@@ -251,8 +251,10 @@ public class Expression2Term {
 			
 			// Check if this is a nonlinear operation: *, div, mod
 			final boolean isNonlinearOp = (op == BinaryExpression.Operator.ARITHMUL 
-				|| op == BinaryExpression.Operator.ARITHDIV 
-				|| op == BinaryExpression.Operator.ARITHMOD);
+			|| op == BinaryExpression.Operator.ARITHDIV 
+			|| op == BinaryExpression.Operator.INTDIV 
+			|| op == BinaryExpression.Operator.REALDIV 
+			|| op == BinaryExpression.Operator.ARITHMOD);
 			
 			// If nonlinear operation AND both operands are NOT constants, use uninterpreted function
 			if (isNonlinearOp && !isConstantExpression(binexp.getLeft()) && !isConstantExpression(binexp.getRight())) {
@@ -262,7 +264,12 @@ public class Expression2Term {
 				
 				if (op == BinaryExpression.Operator.ARITHMUL) {
 					funcname = isRealType(leftType) ? "nonlinearMul_Real" : "nonlinearMul_Int";
-				} else if (op == BinaryExpression.Operator.ARITHDIV) {
+				} else if (op == BinaryExpression.Operator.INTDIV) {
+					funcname = "nonlinearDiv_Int";
+				} else if (op == BinaryExpression.Operator.REALDIV) {
+					funcname = "nonlinearDiv_Real";
+				} 
+				else if (op == BinaryExpression.Operator.ARITHDIV) {
 					funcname = isRealType(leftType) ? "nonlinearDiv_Real" : "nonlinearDiv_Int";
 				} else { // ARITHMOD
 					funcname = "nonlinearMod_Int"; // mod only exists for Int
@@ -288,6 +295,7 @@ public class Expression2Term {
 				mOldContextScopeDepth--;
 				return term;
 			}
+			
 			final String funcname = mOperationTranslator.opTranslation(op, unexp.getExpr().getType());
 			final BigInteger[] indices = null;
 			return SmtUtils.termWithLocalSimplification(logger, mScript, funcname, indices, null, translate(unexp.getExpr()));

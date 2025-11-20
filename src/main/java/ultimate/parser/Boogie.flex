@@ -132,6 +132,8 @@ BvType = "bv" {DecIntegerLiteral}
   "+"             { return symbol(LexerSymbols.PLUS); }
   "-"             { return symbol(LexerSymbols.MINUS); }
   "*"             { return symbol(LexerSymbols.TIMES); }
+  "div"           { return symbol(LexerSymbols.DIV); }
+  "mod"           { return symbol(LexerSymbols.MODKW); }
   "/"             { return symbol(LexerSymbols.DIVIDE); }
   "%"             { return symbol(LexerSymbols.MOD); }
   "!"             { return symbol(LexerSymbols.NOT); }

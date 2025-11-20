@@ -90,6 +90,10 @@ public class DefaultOperationTranslator implements IOperationTranslator {
 			return "=>";
 		} else if (op == BinaryExpression.Operator.LOGICIFF) {
 			return "=";
+		} else if (op == BinaryExpression.Operator.INTDIV) {
+			return "div";
+		} else if (op == BinaryExpression.Operator.REALDIV) {
+			return "/";
 		} else if (op == BinaryExpression.Operator.ARITHDIV) {
 			final IBoogieType type = type1 == null ? type2 : type1;
 			if (type instanceof BoogiePrimitiveType) {

@@ -39,6 +39,7 @@ import ultimate.ast.LeftHandSide;
 import ultimate.ast.StructLHS;
 import ultimate.ast.UnaryExpression.Operator;
 import ultimate.ast.VariableLHS;
+import ultimate.preprocessor.TypeChecker;
 import ultimate.type.BoogieArrayType;
 import ultimate.type.BoogiePrimitiveType;
 import ultimate.type.BoogieStructType;
@@ -196,6 +197,8 @@ public class TypeCheckHelper {
 				break;
 			case ARITHDIV:
 			case ARITHMINUS:
+			case INTDIV:
+			case REALDIV:
 			case ARITHMOD:
 			case ARITHMUL:
 			case ARITHPLUS:

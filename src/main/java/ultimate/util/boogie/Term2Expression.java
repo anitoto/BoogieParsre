@@ -552,15 +552,17 @@ public final class Term2Expression implements Serializable {
 		} else if ("*".equals(symb.getName())) {
 			return Operator.ARITHMUL;
 		} else if ("/".equals(symb.getName())) {
-			return Operator.ARITHDIV;
+			return Operator.REALDIV;
 		} else if ("div".equals(symb.getName())) {
-			return Operator.ARITHDIV;
+			return Operator.INTDIV;
 		} else if ("mod".equals(symb.getName())) {
 			return Operator.ARITHMOD;
 		} else if ("nonlinearMul_Int".equals(symb.getName()) || "nonlinearMul_Real".equals(symb.getName())) {
 			return Operator.ARITHMUL;
-		} else if ("nonlinearDiv_Int".equals(symb.getName()) || "nonlinearDiv_Real".equals(symb.getName())) {
-			return Operator.ARITHDIV;
+		} else if ("nonlinearDiv_Int".equals(symb.getName())) {
+			return Operator.INTDIV;
+		} else if ("nonlinearDiv_Real".equals(symb.getName())) {
+			return Operator.REALDIV;
 		} else if ("nonlinearMod_Int".equals(symb.getName())) {
 			return Operator.ARITHMOD;
 		} else if ("ite".equals(symb.getName())) {

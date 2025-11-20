@@ -301,6 +301,8 @@ public class BoogieExpressionTransformer implements INormalFormable<Expression> 
 			final Operator negatedOp;
 			switch (binexp.getOperator()) {
 			case ARITHDIV:
+			case INTDIV:
+			case REALDIV:
 			case ARITHMINUS:
 			case ARITHMOD:
 			case ARITHMUL:

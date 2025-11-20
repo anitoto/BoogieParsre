@@ -240,6 +240,13 @@ public class BoogieOutput {
 				lPrec = 8;
 				rPrec = 9;
 				break;
+			case INTDIV:
+				op = " div ";
+				opPrec = 8;
+				lPrec = 8;
+				rPrec = 9;
+				break;
+			case REALDIV:
 			case ARITHDIV:
 				op = " / ";
 				opPrec = 8;

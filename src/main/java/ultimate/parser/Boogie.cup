@@ -103,7 +103,7 @@ terminal COMMA, COLON, SEMI, COLONEQUALS, EQUALS, ASSIGN;
 terminal LPAR, RPAR, LBKT, RBKT, LBRCCOLON, LBRC, RBRC, LANG, RANG;
 terminal LESS, GREATER, LTEQ, GTEQ, NEQ, EQ, PARTORDER;
 terminal PLUS, MINUS;
-terminal TIMES, DIVIDE, MOD;
+terminal TIMES, DIVIDE, MOD, DIV, MODKW;
 terminal QSEP, NOT, OR, AND, IMPLIES, IFF, EXPLIES;
 terminal CONCAT;
 /* Numbers, Ids and Strings */
@@ -501,11 +501,14 @@ expr5 ::= expr5NI:e1 PLUS expr6:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMINUS, e1, e2);:}
         | expr6:e
         ;
-        
 expr6 ::= expr6NI:e1 TIMES expr7:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMUL, e1, e2);:}
+        | expr6NI:e1 DIV expr7:e2
+		   {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.INTDIV, e1, e2);:}
         | expr6NI:e1 DIVIDE expr7:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHDIV, e1, e2);:}
+        | expr6NI:e1 MODKW expr7:e2
+           {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMOD, e1, e2);:}
         | expr6NI:e1 MOD expr7:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMOD, e1, e2);:}
         | expr7:e
@@ -621,8 +624,12 @@ expr5NI ::= expr5NI:e1 PLUS expr6NI:e2
         
 expr6NI ::= expr6NI:e1 TIMES expr7NI:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMUL, e1, e2);:}
+        | expr6NI:e1 DIV expr7NI:e2
+		   {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.INTDIV, e1, e2);:}
         | expr6NI:e1 DIVIDE expr7NI:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHDIV, e1, e2);:}
+        | expr6NI:e1 MODKW expr7NI:e2
+           {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMOD, e1, e2);:}
         | expr6NI:e1 MOD expr7NI:e2
            {:RESULT = new BinaryExpression(getLocation(e1$,e2$), BinaryExpression.Operator.ARITHMOD, e1, e2);:}
         | expr7NI:e {:RESULT = e;:}
