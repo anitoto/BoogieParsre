@@ -101,6 +101,9 @@ public class Boogie2SmtSymbolTable
 
 	private static final String ID_INDICES = "indices";
 
+	// Track which nonlinear functions have been declared to avoid duplicate declarations
+	private static final Set<String> DECLARED_NONLINEAR_FUNCTIONS = new HashSet<>();
+
 	private final BoogieDeclarations mBoogieDeclarations;
 	private final ManagedScript mScript;
 	private final TypeSortTranslator mTypeSortTranslator;
@@ -127,6 +130,8 @@ public class Boogie2SmtSymbolTable
 	private final Map<String, Map<String, Expression[]>> mBoogieFunction2Attributes = new HashMap<>();
 
 	private final DefaultIcfgSymbolTable mICfgSymbolTable = new DefaultIcfgSymbolTable();
+
+	private final Set<String> mDeclaredNonlinearFunctions = new HashSet<>();
 
 	public Boogie2SmtSymbolTable(final BoogieDeclarations boogieDeclarations, final ManagedScript script,
 			final TypeSortTranslator typeSortTranslator, final Set<IProgramNonOldVar> cfgAuxVars) {
@@ -157,6 +162,7 @@ public class Boogie2SmtSymbolTable
 		mScript.echo(this, new QuotedObject("Finished declaration of functions"));
 
 		mScript.echo(this, new QuotedObject("Start declaration of nonlinear functions"));
+		System.out.println("AK IM HERE IN BOOGIE2SMTSYMBTABLE");
 		declareNonlinearFunctions();
 		mScript.echo(this, new QuotedObject("Finished declaration of nonlinear functions"));
 
@@ -245,6 +251,36 @@ public class Boogie2SmtSymbolTable
 			throw new AssertionError("inappropriate decl info");
 		}
 		return result;
+	}
+
+	/**
+	 * Declare a nonlinear function if not already declared.
+	 */
+	public void ensureNonlinearFunctionDeclared(String functionName) {
+		// Si déjà déclarée, ne rien faire
+		if (mDeclaredNonlinearFunctions.contains(functionName)) {
+			return;
+		}
+		
+		System.out.println("AK ensure declaration ? funcname "+functionName);
+		final Sort intSort = SmtSortUtils.getIntSort(mScript.getScript());
+		final Sort realSort = SmtSortUtils.getRealSort(mScript.getScript());
+		
+		// Déclarer selon le nom
+		if ("nonlinearMul_Int".equals(functionName)) {
+			mScript.getScript().declareFun("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
+		} else if ("nonlinearMul_Real".equals(functionName)) {
+			mScript.getScript().declareFun("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
+		} else if ("nonlinearDiv_Int".equals(functionName)) {
+			mScript.getScript().declareFun("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
+		} else if ("nonlinearDiv_Real".equals(functionName)) {
+			mScript.getScript().declareFun("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
+		} else if ("nonlinearMod_Int".equals(functionName)) {
+			mScript.getScript().declareFun("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
+		}
+		
+		// Marquer comme déclarée
+		mDeclaredNonlinearFunctions.add(functionName);
 	}
 
 	/**
@@ -389,22 +425,47 @@ public class Boogie2SmtSymbolTable
 	}
 
 	/**
+	 * Declare a function in the SMT solver only if it doesn't already exist.
+	 * 
+	 * @param name the name of the function
+	 * @param paramSorts the parameter sorts
+	 * @param returnSort the return sort
+	 */
+	private void declareFunctionIfNotExists(final String name, final Sort[] paramSorts, final Sort returnSort) {
+		// Check if we've already declared this function
+		if (DECLARED_NONLINEAR_FUNCTIONS.contains(name)) {
+			return;
+		}
+			System.out.println("where am i AK ?? "+name);
+
+		try {
+			// Declare the function
+			mScript.getScript().declareFun(name, paramSorts, returnSort);
+			// Mark as declared
+			DECLARED_NONLINEAR_FUNCTIONS.add(name);
+		} catch (final Exception e) {
+			// Function already exists in the solver - mark as declared to avoid future attempts
+			DECLARED_NONLINEAR_FUNCTIONS.add(name);
+		}
+	}
+
+	/**
 	 * Declare uninterpreted functions for nonlinear arithmetic operations.
 	 */
 	private void declareNonlinearFunctions() {
 		final Sort intSort = SmtSortUtils.getIntSort(mScript.getScript());
 		final Sort realSort = SmtSortUtils.getRealSort(mScript.getScript());
 		
-		// Declare nonlinearMul for Int and Real
-		mScript.getScript().declareFun("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
-		mScript.getScript().declareFun("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
+		// Declare nonlinearMul for Int and Real (only if not already declared)
+		declareFunctionIfNotExists("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
+		declareFunctionIfNotExists("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
 		
-		// Declare nonlinearDiv for Int and Real
-		mScript.getScript().declareFun("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
-		mScript.getScript().declareFun("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
+		// Declare nonlinearDiv for Int and Real (only if not already declared)
+		declareFunctionIfNotExists("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
+		declareFunctionIfNotExists("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
 		
-		// Declare nonlinearMod for Int only
-		mScript.getScript().declareFun("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
+		// Declare nonlinearMod for Int only (mod is not defined for Real)
+		declareFunctionIfNotExists("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
 	}
 
 	/**

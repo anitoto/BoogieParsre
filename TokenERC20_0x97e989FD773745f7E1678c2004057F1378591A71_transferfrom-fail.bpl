@@ -1033,8 +1033,8 @@ return;
 
 implementation burnFrom~address~uint256_TokenERC20__success(this: Ref, msgsender_MSG: Ref, msgvalue_MSG: int, _from_s533: Ref, _value_s533: int) returns (success_s533: bool)
 {
-var blablabla : real;
-var realer : real;
+var blablabla : int;
+var realer : int;
 realer := 2.0;
 if (!((balanceOf_TokenERC20[this][_from_s533]) >= (_value_s533))) {
 revert := true;
@@ -1052,7 +1052,7 @@ allowance_TokenERC20[this][_from_s533][msgsender_MSG] := (allowance_TokenERC20[t
 sum_allowance3[_from_s533] := (sum_allowance3[_from_s533]) + (allowance_TokenERC20[this][_from_s533][msgsender_MSG]);
 totalSupply_TokenERC20[this] := (totalSupply_TokenERC20[this]) - (_value_s533);
 assert {:EventEmitted "Burn_TokenERC20"} (true);
-blablabla := realer  / 3 ;
+blablabla := realer  * msgvalue_MSG ;
 success_s533 := true;
 
 return;
