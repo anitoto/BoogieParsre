@@ -101,6 +101,9 @@ public class Boogie2SmtSymbolTable
 
 	private static final String ID_INDICES = "indices";
 
+	// Track which nonlinear functions have been declared to avoid duplicate declarations
+	private static final Set<String> DECLARED_NONLINEAR_FUNCTIONS = new HashSet<>();
+
 	private final BoogieDeclarations mBoogieDeclarations;
 	private final ManagedScript mScript;
 	private final TypeSortTranslator mTypeSortTranslator;
@@ -395,16 +398,37 @@ public class Boogie2SmtSymbolTable
 		final Sort intSort = SmtSortUtils.getIntSort(mScript.getScript());
 		final Sort realSort = SmtSortUtils.getRealSort(mScript.getScript());
 		
-		// Declare nonlinearMul for Int and Real
-		mScript.getScript().declareFun("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
-		mScript.getScript().declareFun("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
+		// Declare nonlinearMul for Int and Real (only if not already declared)
+		declareFunctionIfNotExists("nonlinearMul_Int", new Sort[]{intSort, intSort}, intSort);
+		declareFunctionIfNotExists("nonlinearMul_Real", new Sort[]{realSort, realSort}, realSort);
 		
-		// Declare nonlinearDiv for Int and Real
-		mScript.getScript().declareFun("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
-		mScript.getScript().declareFun("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
+		// Declare nonlinearDiv for Int and Real (only if not already declared)
+		declareFunctionIfNotExists("nonlinearDiv_Int", new Sort[]{intSort, intSort}, intSort);
+		declareFunctionIfNotExists("nonlinearDiv_Real", new Sort[]{realSort, realSort}, realSort);
 		
-		// Declare nonlinearMod for Int only
-		mScript.getScript().declareFun("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
+		// Declare nonlinearMod for Int only (mod is not defined for Real)
+		declareFunctionIfNotExists("nonlinearMod_Int", new Sort[]{intSort, intSort}, intSort);
+	}
+
+	private void declareFunctionIfNotExists(final String name, final Sort[] paramSorts, final Sort returnSort) {
+		if (DECLARED_NONLINEAR_FUNCTIONS.contains(name)) {
+			return;
+		}
+		
+		try {
+			mScript.getScript().declareFun(name, paramSorts, returnSort);
+			DECLARED_NONLINEAR_FUNCTIONS.add(name);
+			System.out.println("Declared nonlinear function: " + name);
+			
+			mBoogieFunction2SmtFunction.put(name, name);
+			mSmtFunction2BoogieFunction.put(name, name);
+			
+		} catch (final Exception e) {
+			DECLARED_NONLINEAR_FUNCTIONS.add(name);
+			// Même si déjà déclarée, ajouter aux maps
+			mBoogieFunction2SmtFunction.put(name, name);
+			mSmtFunction2BoogieFunction.put(name, name);
+		}
 	}
 
 	/**
@@ -792,4 +816,5 @@ public class Boogie2SmtSymbolTable
 	private static <V, T, K1, K2> Stream<T> getAll(final Map<K1, Map<K2, V>> map, final Function<V, T> fun) {
 		return map.entrySet().stream().flatMap(a -> a.getValue().entrySet().stream()).map(a -> fun.apply(a.getValue()));
 	}
+
 }

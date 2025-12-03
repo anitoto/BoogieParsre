@@ -246,6 +246,10 @@ public class BoogieDeclarations {
 		return mFunctionDeclarations;
 	}
 
+	public void addFunctionDeclaration(final FunctionDeclaration funcDecl) {
+		mFunctionDeclarations.add(funcDecl);
+	}
+	
 	public List<VariableDeclaration> getGlobalVarDeclarations() {
 		return mGlobalVarDeclarations;
 	}
