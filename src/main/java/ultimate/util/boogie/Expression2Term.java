@@ -261,7 +261,13 @@ public class Expression2Term {
 				// Determine the function name based on operation and type
 				final String funcname;
 				final IBoogieType leftType = binexp.getLeft().getType();
-				
+				final IBoogieType rightType = binexp.getRight().getType();
+				final IBoogieType type = leftType != null ? leftType : rightType;
+
+				if (type == null) {
+					throw new AssertionError("Cannot determine type for nonlinear operation");
+				}
+
 				if (op == BinaryExpression.Operator.ARITHMUL) {
 					funcname = isRealType(leftType) ? "nonlinearMul_Real" : "nonlinearMul_Int";
 				} else if (op == BinaryExpression.Operator.INTDIV) {
@@ -274,6 +280,7 @@ public class Expression2Term {
 				} else { // ARITHMOD
 					funcname = "nonlinearMod_Int"; // mod only exists for Int
 				}
+				// mBoogie2SmtSymbolTable.ensureNonlinearFunctionDeclared(funcname);
 				
 				final BigInteger[] indices = null;
 				return SmtUtils.termWithLocalSimplification(logger, mScript, funcname, indices, null, 
